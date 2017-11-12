@@ -6,7 +6,8 @@ import java.io.*;
 
 public class StringSender implements Runnable
 {
-	private Scanner scan; private PrintWriter out;
+	private Scanner scan;
+	private PrintWriter out;
 	boolean cont = true;
 
 	public StringSender(PrintWriter out) {
