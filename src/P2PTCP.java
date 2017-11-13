@@ -19,39 +19,86 @@ public class P2PTCP {
         if (args[0].equals("server")) {
             try {
 
-                if (!keGen.generateKey()){
+                if (!keGen.generateKey()) {
 
                     throw new IOException("No key generated");
                 }
 
-                ServerSocket ss = new ServerSocket(Integer.parseInt(args[1]));
+                ServerSocket ss = new ServerSocket(Integer.parseInt(args[2]));
                 System.out.println("Server address: " + ss.getLocalSocketAddress());
                 System.out.println("Waiting for connection...");
+
                 peerConnectionSocket = ss.accept();
 
-                st = new Thread(new StringSender(new PrintWriter(peerConnectionSocket.getOutputStream())));
+                ObjectOutputStream os = new ObjectOutputStream(peerConnectionSocket.getOutputStream());
+                ObjectInputStream is = new ObjectInputStream(peerConnectionSocket.getInputStream());
+
+
+                os.writeObject(new Message(keGen.getPublicKey(),"Welcome!"));
+
+
+                String secretNumber = (String) is.readObject();
+                System.out.println("SecretNumber before decryp: " + secretNumber);
+
+                String decryptedNumber = keGen.decrypt(secretNumber);
+                System.out.println("SecretNumber after decryp: " + decryptedNumber);
+
+
+                st = new Thread(new StringSender(os, keGen.getPublicKey()));
                 st.start();
-                scan = new Scanner(peerConnectionSocket.getInputStream());
-                String fromSocket;
-                while ((fromSocket = scan.nextLine()) != null)
-                    System.out.println(fromSocket);
+                Message messageFromServer;
+                while ((messageFromServer = (Message) is.readObject()) != null) {
+                    System.out.println(messageFromServer.getMsg());
+                }
+
             } catch (IOException e) {
                 System.err.println("Server crash");
                 e.printStackTrace();
+            } catch (ClassNotFoundException ce) {
+                ce.printStackTrace();
             } finally {
                 st.stop();
             }
         } else if (args[0].equals("client")) {
             try {
-                peerConnectionSocket = new Socket("localhost", Integer.parseInt(args[1]));
 
-                st = new Thread(new StringSender(new PrintWriter(peerConnectionSocket.getOutputStream())));
+                peerConnectionSocket = new Socket("localhost", Integer.parseInt(args[1]));
+                System.out.println("Connection established");
+
+                System.out.println("Connection os");
+                ObjectOutputStream os = new ObjectOutputStream(peerConnectionSocket.getOutputStream());
+                System.out.println("Connection is");
+                ObjectInputStream is = new ObjectInputStream(peerConnectionSocket.getInputStream());
+
+
+                System.out.println("Waiting for public key");
+                Message initMessage = (Message) is.readObject();
+                PublicKey publicKey = initMessage.getPublicKeyFromSender();
+
+//                while ((publicKey = (PublicKey) is.readObject()) != null){
+//
+                System.out.println("PubKey: " + publicKey.toString());
+
+                Random rand = new Random();
+                int secret = rand.nextInt(100) + 1;
+
+                System.out.println("secret number: " + secret);
+
+                String encryptedMsg = RsaKeyGenerator.encrypt("" + secret, publicKey);
+
+                os.writeObject(encryptedMsg);
+
+
+                st = new Thread(new StringSender(os, publicKey));
                 st.start();
-                scan = new Scanner(peerConnectionSocket.getInputStream());
-                String fromSocket;
-                while ((fromSocket = scan.nextLine()) != null)
-                    System.out.println(fromSocket);
+                Message messageFromServer;
+                while ((messageFromServer = (Message) is.readObject()) != null) {
+                    System.out.println(messageFromServer.getMsg());
+                }
+
+
             } catch (Exception e) {
+                e.printStackTrace();
                 System.err.println("Client crash");
             } finally {
                 st.stop();

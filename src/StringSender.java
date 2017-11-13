@@ -1,44 +1,37 @@
 /**
  * Created by cj on 12/11/15.
  */
+
 import java.util.*;
 import java.io.*;
 
-public class StringSender implements Runnable
-{
-	private Scanner scan;
-	private PrintWriter out;
-	boolean cont = true;
+public class StringSender implements Runnable {
+    private Scanner scan;
+    private PublicKey publicKey;
+    private ObjectOutputStream out;
+    boolean cont = true;
 
-	public StringSender(PrintWriter out) {
-		this.out = out; scan = new Scanner(System.in);
-	}
+    public StringSender(ObjectOutputStream out, PublicKey publicKey) {
+        this.out = out;
+        this.publicKey = publicKey;
+        scan = new Scanner(System.in);
+    }
 
-	public void run() {
-		while(cont==true) {
-			System.out.print("Send > "); String str = scan.nextLine();
+    public void run() {
+        while (cont == true) {
+            System.out.print("Send > ");
+            String str = scan.nextLine();
+            try {
+                out.writeObject(new Message(publicKey, str));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-
-
-
-
-			out.println(str); out.flush();
-		}
-	}
-
-	public void stop(){cont=false;}
-
-
-	public static void main(String[] args)
-	{
-		Thread st = new Thread( new StringSender(new PrintWriter(System.out)));
-		st.start();
-		try{
-			Thread.sleep(5000);
-		}
-		catch(Exception e) {}
-		finally {st.stop();} //.stop();}
-	}
+    public void stop() {
+        cont = false;
+    }
 
 }
 
