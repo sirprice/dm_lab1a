@@ -4,7 +4,7 @@ import java.util.Random;
 /**
  * Created by cj on 12/11/15.
  */
-public class RsaKeyGenerator {
+public class RSA {
 
     //number of bits specifying how many different characters we are able to encrypt
     private int numberOfBits = 0;
@@ -16,7 +16,7 @@ public class RsaKeyGenerator {
     private BigInteger e;
 
 
-    public RsaKeyGenerator(int numberOfBits) {
+    public RSA(int numberOfBits) {
         this.numberOfBits = numberOfBits;
     }
 
@@ -110,7 +110,7 @@ public class RsaKeyGenerator {
     }
 
     public String decrypt(String message) {
-        BigInteger msg = new BigInteger(message); // f;r den 'r redan i byteform
+        BigInteger msg = new BigInteger(message); // för den är redan i byteform
 
         String dMsg = new String(msg.modPow(d, n).toByteArray()); // T = decrypt(C) = C^d mod(n)
 

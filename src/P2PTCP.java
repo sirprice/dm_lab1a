@@ -8,13 +8,14 @@ import java.util.*;
 
 public class P2PTCP {
 
+    public static String host = "130.229.172.12";
+
     public static void main(String[] args) {
 
         Scanner scan;
         Thread st = null;
         Socket peerConnectionSocket = null;
 
-        RsaKeyGenerator keGen = new RsaKeyGenerator(Integer.parseInt(args[1]));
 
         /**
          * arguments for server:
@@ -23,9 +24,10 @@ public class P2PTCP {
          * 2: portNumber
          */
         if (args[0].equals("server")) {
+            RSA rsa = new RSA(Integer.parseInt(args[1]));
             try {
 
-                if (!keGen.generateKey()) {
+                if (!rsa.generateKey()) {
 
                     throw new IOException("No key generated");
                 }
@@ -40,21 +42,23 @@ public class P2PTCP {
                 ObjectInputStream is = new ObjectInputStream(peerConnectionSocket.getInputStream());
 
 
-                os.writeObject(new Message(keGen.getPublicKey(),"Welcome!"));
+                os.writeObject(new Message(rsa.getPublicKey(), "Welcome!"));
 
 
                 String secretNumber = (String) is.readObject();
                 System.out.println("SecretNumber before decryp: " + secretNumber);
 
-                String decryptedNumber = keGen.decrypt(secretNumber);
+                String decryptedNumber = rsa.decrypt(secretNumber);
                 System.out.println("SecretNumber after decryp: " + decryptedNumber);
 
 
-                st = new Thread(new StringSender(os, keGen.getPublicKey()));
+                st = new Thread(new MessageSender(os, rsa.getPublicKey()));
                 st.start();
-                Message messageFromServer;
-                while ((messageFromServer = (Message) is.readObject()) != null) {
-                    System.out.println(messageFromServer.getMsg());
+                Message messageFromClient;
+                while ((messageFromClient = (Message) is.readObject()) != null) {
+                    System.out.println("SecretNumber before decryp: " +messageFromClient.getMsg());
+
+                    System.out.println(rsa.decrypt(messageFromClient.getMsg()));
                 }
 
             } catch (IOException e) {
@@ -74,10 +78,10 @@ public class P2PTCP {
          */
         else if (args[0].equals("client")) {
             try {
+                System.out.println(args[1]);
+                peerConnectionSocket = new Socket(args[1], Integer.parseInt(args[2]));
 
-                peerConnectionSocket = new Socket("localhost", Integer.parseInt(args[1]));
                 System.out.println("Connection established");
-
                 System.out.println("Connection os");
                 ObjectOutputStream os = new ObjectOutputStream(peerConnectionSocket.getOutputStream());
                 System.out.println("Connection is");
@@ -97,12 +101,12 @@ public class P2PTCP {
 
                 System.out.println("secret number: " + secret);
 
-                String encryptedMsg = RsaKeyGenerator.encrypt("" + secret, publicKey);
+                String encryptedMsg = RSA.encrypt("" + secret, publicKey);
 
                 os.writeObject(encryptedMsg);
 
 
-                st = new Thread(new StringSender(os, publicKey));
+                st = new Thread(new MessageSender(os, publicKey));
                 st.start();
                 Message messageFromServer;
                 while ((messageFromServer = (Message) is.readObject()) != null) {
