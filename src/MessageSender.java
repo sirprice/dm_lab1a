@@ -5,13 +5,13 @@
 import java.util.*;
 import java.io.*;
 
-public class StringSender implements Runnable {
+public class MessageSender implements Runnable {
     private Scanner scan;
     private PublicKey publicKey;
     private ObjectOutputStream out;
     boolean cont = true;
 
-    public StringSender(ObjectOutputStream out, PublicKey publicKey) {
+    public MessageSender(ObjectOutputStream out, PublicKey publicKey) {
         this.out = out;
         this.publicKey = publicKey;
         scan = new Scanner(System.in);
@@ -22,7 +22,7 @@ public class StringSender implements Runnable {
             System.out.print("Send > ");
             String str = scan.nextLine();
             try {
-                out.writeObject(new Message(publicKey, str));
+                out.writeObject(new Message(publicKey, RSA.encrypt(str,publicKey)));
             } catch (IOException e) {
                 e.printStackTrace();
             }
