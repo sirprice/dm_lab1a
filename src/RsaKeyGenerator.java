@@ -1,12 +1,13 @@
 import java.math.BigInteger;
 import java.util.Random;
-import java.util.function.BiFunction;
 
 /**
  * Created by cj on 12/11/15.
  */
 public class RsaKeyGenerator {
-    private int numberOfBitsThatWillCreateOurRSAKey = 0;
+
+    //number of bits specifying how many different characters we are able to encrypt
+    private int numberOfBits = 0;
     private BigInteger p;
     private BigInteger q;
     private BigInteger n;
@@ -15,8 +16,8 @@ public class RsaKeyGenerator {
     private BigInteger e;
 
 
-    public RsaKeyGenerator(int numberOfBitsThatWillCreateOurRSAKey) {
-        this.numberOfBitsThatWillCreateOurRSAKey = numberOfBitsThatWillCreateOurRSAKey;
+    public RsaKeyGenerator(int numberOfBits) {
+        this.numberOfBits = numberOfBits;
     }
 
     public boolean generateKey() {
@@ -32,32 +33,42 @@ public class RsaKeyGenerator {
                 Random rand = new Random();
                 rand.setSeed(System.currentTimeMillis());
 
-                p = p.valueOf(rand.nextLong());
-                System.out.println("orginal p: " + p);
+                /**
+                 Välj två primtal p och q och beräkna n = p * q
+                 */
 
-                q = q.valueOf(rand.nextLong());
-                System.out.println("orginal q: " + q);
-
-                p = p.nextProbablePrime();
+                p = new BigInteger(numberOfBits /2, 100, rand);
                 System.out.println("p next probablePrime: " + p);
 
-                q = q.nextProbablePrime();
+                q = new BigInteger(numberOfBits /2, 100, rand);
                 System.out.println("q next probablePrime: " + q);
 
                 n = (p.multiply(q));
+
+                /**
+                 Välj e så att e och phi = (p-1)*(q-1) är relativt prima
+                 */
+
                 p = p.subtract(BigInteger.ONE);
                 q = q.subtract(BigInteger.ONE);
 
                 phi = p.multiply(q);
 
-                e = e.valueOf(rand.nextLong()); // borde vara mindre än phi
+                e = new BigInteger(numberOfBits /2, 100, rand); // bör vara mindre än phi
 
+                // check if
                 if (e.gcd(phi).equals(BigInteger.ONE)) {
-                    System.out.println("E är prima");
+                    System.out.println("E och phi är relativt prima");
                 } else{
-                    System.out.println("E är inte inte prima");
+                    System.out.println("E och phi är inte relativt prima");
                 }
 
+
+
+                /**
+                    d väljs nu som multiplicativa inversen till e modulus phi
+                    dvs. att d * e kongurent med 1 mod (phi)
+                 */
                 d = e.modInverse(phi);
 
                 foundAKey = true;
@@ -67,6 +78,7 @@ public class RsaKeyGenerator {
 
 
             } catch (ArithmeticException ae) {
+                ae.printStackTrace();
                 System.out.println("could not find good starting values for RSA ");
 
             }
@@ -86,4 +98,28 @@ public class RsaKeyGenerator {
     public BigInteger getD() {
         return d;
     }
+
+
+
+    static public String encrypt(String message, PublicKey publicKey) {
+        BigInteger msg = new BigInteger(message.getBytes());
+
+        String cMsg = msg.modPow(publicKey.getE(),publicKey.getN()).toString(); // C = encrypt(T) = T^e mod(n)
+
+        return cMsg;
+    }
+
+    public String decrypt(String message) {
+        BigInteger msg = new BigInteger(message); // f;r den 'r redan i byteform
+
+        String dMsg = new String(msg.modPow(d, n).toByteArray()); // T = decrypt(C) = C^d mod(n)
+
+        return dMsg;
+    }
+
+
+    public PublicKey getPublicKey(){
+        return new PublicKey(e,n);
+    }
+
 }
