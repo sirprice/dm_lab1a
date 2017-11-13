@@ -8,6 +8,7 @@ import java.util.*;
 
 public class P2PTCP {
 
+	public static String host = "130.229.172.12";
     public static void main(String[] args) {
 
         Scanner scan;
@@ -43,7 +44,7 @@ public class P2PTCP {
             }
         } else if (args[0].equals("client")) {
             try {
-                peerConnectionSocket = new Socket("localhost", Integer.parseInt(args[1]));
+                peerConnectionSocket = new Socket(host, Integer.parseInt(args[1]));
 
                 st = new Thread(new StringSender(new PrintWriter(peerConnectionSocket.getOutputStream())));
                 st.start();
