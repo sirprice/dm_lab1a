@@ -16,6 +16,12 @@ public class P2PTCP {
 
         RsaKeyGenerator keGen = new RsaKeyGenerator(Integer.parseInt(args[1]));
 
+        /**
+         * arguments for server:
+         * 0: "server"
+         * 1: bitlength
+         * 2: portNumber
+         */
         if (args[0].equals("server")) {
             try {
 
@@ -59,7 +65,14 @@ public class P2PTCP {
             } finally {
                 st.stop();
             }
-        } else if (args[0].equals("client")) {
+        }
+        /**
+         * arguments for client:
+         * 0: "client"
+         * 1: ipAddress
+         * 2: portNumber
+         */
+        else if (args[0].equals("client")) {
             try {
 
                 peerConnectionSocket = new Socket("localhost", Integer.parseInt(args[1]));
