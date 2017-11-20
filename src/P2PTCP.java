@@ -10,6 +10,7 @@ public class P2PTCP {
 
     public static String host = "130.229.172.12";
 
+
     public static void main(String[] args) {
 
         Scanner scan;
@@ -25,6 +26,8 @@ public class P2PTCP {
          */
         if (args[0].equals("server")) {
             RSA rsa = new RSA(Integer.parseInt(args[1]));
+            List<User> users = new LinkedList<>();
+
             try {
 
                 if (!rsa.generateKey()) {
@@ -42,7 +45,7 @@ public class P2PTCP {
                 ObjectInputStream is = new ObjectInputStream(peerConnectionSocket.getInputStream());
 
 
-                os.writeObject(new Message(rsa.getPublicKey(), "Welcome!"));
+                os.writeObject(new Message(rsa.getPublicKey(), "Welcome!", Message.Type.WELCOME));
 
 
                 String secretNumber = (String) is.readObject();
@@ -56,9 +59,28 @@ public class P2PTCP {
                 st.start();
                 Message messageFromClient;
                 while ((messageFromClient = (Message) is.readObject()) != null) {
-                    System.out.println("SecretNumber before decryp: " +messageFromClient.getMsg());
 
-                    System.out.println(rsa.decrypt(messageFromClient.getMsg()));
+                    switch (messageFromClient.getType()) {
+
+                        case LOGIN:
+                            users.add(messageFromClient.getFromUser());
+
+
+
+                            break;
+                        case MESSAGE:
+                            System.out.println("SecretNumber before decryp: " + messageFromClient.getMsg());
+                            System.out.println(rsa.decrypt(messageFromClient.getMsg()));
+                            break;
+
+                    }
+
+
+
+
+
+
+
                 }
 
             } catch (IOException e) {
@@ -80,6 +102,10 @@ public class P2PTCP {
             try {
                 System.out.println(args[1]);
                 peerConnectionSocket = new Socket(args[1], Integer.parseInt(args[2]));
+
+                RSA rsa = new RSA(Integer.parseInt(args[2]));
+                User me = new User(rsa.getPublicKey(), args[3]);
+
 
                 System.out.println("Connection established");
                 System.out.println("Connection os");
