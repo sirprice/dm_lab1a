@@ -1,3 +1,6 @@
+package client;
+
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Random;
 
@@ -79,7 +82,7 @@ public class RSA {
 
             } catch (ArithmeticException ae) {
                 ae.printStackTrace();
-                System.out.println("could not find good starting values for RSA ");
+                System.out.println("could not find good starting values for client.RSA ");
 
             }
         }
@@ -121,5 +124,8 @@ public class RSA {
     public PublicKey getPublicKey(){
         return new PublicKey(e,n);
     }
+
+
+
 
 }
