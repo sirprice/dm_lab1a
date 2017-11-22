@@ -21,90 +21,78 @@ public class RSA {
     }
 
     public boolean generateKey() {
+
         boolean foundAKey = false;
 
-        while (!foundAKey) {
+
+        try {
+            System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
 
 
-            try {
-                System.out.println(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
+            Random rand = new Random();
+            rand.setSeed(System.currentTimeMillis());
 
+            /**
+             Välj två primtal p och q och beräkna n = p * q
+             */
 
-                Random rand = new Random();
-                rand.setSeed(System.currentTimeMillis());
+            p = new BigInteger(numberOfBits / 2, 100, rand);
+            System.out.println("p next probablePrime: " + p);
 
-                /**
-                 Välj två primtal p och q och beräkna n = p * q
-                 */
+            q = new BigInteger(numberOfBits / 2, 100, rand);
+            System.out.println("q next probablePrime: " + q);
 
-                p = new BigInteger(numberOfBits /2, 100, rand);
-                System.out.println("p next probablePrime: " + p);
+            n = (p.multiply(q));
 
-                q = new BigInteger(numberOfBits /2, 100, rand);
-                System.out.println("q next probablePrime: " + q);
+            /**
+             Välj e så att e och phi = (p-1)*(q-1) är relativt prima
+             */
 
-                n = (p.multiply(q));
+            p = p.subtract(BigInteger.ONE);
+            q = q.subtract(BigInteger.ONE);
 
-                /**
-                 Välj e så att e och phi = (p-1)*(q-1) är relativt prima
-                 */
+            phi = p.multiply(q);
 
-                p = p.subtract(BigInteger.ONE);
-                q = q.subtract(BigInteger.ONE);
+            while (!foundAKey) {
 
-                phi = p.multiply(q);
+                e = new BigInteger(numberOfBits / 2, 100, rand); // bör vara mindre än phi
 
-                e = new BigInteger(numberOfBits /2, 100, rand); // bör vara mindre än phi
-
-                // check if
                 if (e.gcd(phi).equals(BigInteger.ONE)) {
                     System.out.println("E och phi är relativt prima");
-                } else{
+                    foundAKey = true;
+
+                } else {
                     System.out.println("E och phi är inte relativt prima");
                 }
-
-
-
-                /**
-                    d väljs nu som multiplicativa inversen till e modulus phi
-                    dvs. att d * e kongurent med 1 mod (phi)
-                 */
-                d = e.modInverse(phi);
-
-                foundAKey = true;
-
-                System.out.println("Key generated");
-                return true;
-
-
-            } catch (ArithmeticException ae) {
-                ae.printStackTrace();
-                System.out.println("could not find good starting values for RSA ");
-
             }
+
+
+            /**
+             d väljs nu som multiplicativa inversen till e modulus phi
+             dvs. att d * e kongurent med 1 mod (phi)
+             */
+            d = e.modInverse(phi);
+
+
+            System.out.println("Key generated");
+            return true;
+
+
+        } catch (ArithmeticException ae) {
+            ae.printStackTrace();
+            System.out.println("could not find good starting values for RSA ");
+
         }
+
 
         return false;
     }
-
-    public BigInteger getE() {
-        return e;
-    }
-
-    public BigInteger getN() {
-        return n;
-    }
-
-    public BigInteger getD() {
-        return d;
-    }
-
 
 
     static public String encrypt(String message, PublicKey publicKey) {
         BigInteger msg = new BigInteger(message.getBytes());
 
-        String cMsg = msg.modPow(publicKey.getE(),publicKey.getN()).toString(); // C = encrypt(T) = T^e mod(n)
+        String cMsg = msg.modPow(publicKey.getE(), publicKey.getN()).toString(); // C = encrypt(T) = T^e mod(n)
 
         return cMsg;
     }
@@ -118,8 +106,8 @@ public class RSA {
     }
 
 
-    public PublicKey getPublicKey(){
-        return new PublicKey(e,n);
+    public PublicKey getPublicKey() {
+        return new PublicKey(e, n);
     }
 
 }
