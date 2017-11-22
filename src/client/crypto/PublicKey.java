@@ -1,8 +1,10 @@
+package client.crypto;
+
 import java.io.Serializable;
 import java.math.BigInteger;
 
 /**
- * Created by cj on 2017-11-13.
+ * Created by cj on 2017-11-20.
  */
 public class PublicKey implements Serializable {
 

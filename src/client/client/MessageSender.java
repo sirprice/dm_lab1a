@@ -1,8 +1,12 @@
-package client; /**
+package client.client; /**
  * Created by cj on 12/11/15.
  */
 
 
+
+import client.crypto.AES;
+import client.crypto.PublicKey;
+import client.crypto.RSA;
 
 import java.util.*;
 import java.io.*;
@@ -15,7 +19,7 @@ public class MessageSender implements Runnable {
     private ObjectOutputStream out;
     boolean running = true;
 
-    public MessageSender(PublicKey pkToSender,ObjectOutputStream out, RSA rsa, AES aes) {
+    public MessageSender(PublicKey pkToSender, ObjectOutputStream out, RSA rsa, AES aes) {
         this.out = out;
         this.rsa = rsa;
         this.aes = aes;

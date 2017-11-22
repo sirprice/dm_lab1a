@@ -1,5 +1,7 @@
 package client;
 
+import client.client.Client;
+
 /**
  * Created by cj on 2017-11-20.
  */

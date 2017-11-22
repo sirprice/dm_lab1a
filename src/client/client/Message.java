@@ -1,5 +1,7 @@
-package client;
+package client.client;
 
+
+import client.crypto.PublicKey;
 
 import java.io.Serializable;
 

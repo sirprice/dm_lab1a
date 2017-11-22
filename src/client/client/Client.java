@@ -1,4 +1,8 @@
-package client;
+package client.client;
+
+import client.crypto.AES;
+import client.crypto.PublicKey;
+import client.crypto.RSA;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -119,8 +123,7 @@ public class Client implements Runnable, Serializable
             Message messageFromSender;
             while ((messageFromSender = (Message) inputStream.readObject()) != null) {
 
-//                System.out.println(new String(messageFromSender.getMsgBytes()));
-                System.out.println(aes.decrypt(messageFromSender.getMsgBytes()));
+                System.out.println(new String(messageFromSender.getMsgBytes()) + " = " + aes.decrypt(messageFromSender.getMsgBytes()));
             }
 
         } catch (Exception e) {
